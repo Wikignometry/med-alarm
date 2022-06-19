@@ -23,5 +23,10 @@
 hs_err_pid*
 replay_pid*
 
+# idea/android studio files
+.idea
+.gradle
+local.properties
+
 #
-DS.store
+.DS_Store
