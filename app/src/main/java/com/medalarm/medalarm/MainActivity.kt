@@ -4,6 +4,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.widget.TimePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,52 +18,59 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.datastore.core.DataStore
 import com.medalarm.medalarm.ui.theme.MedAlarmTheme
+import kotlinx.coroutines.flow.map
 import java.security.AccessController.getContext
 import java.util.*
-
+import java.util.concurrent.Flow
+import java.util.prefs.Preferences
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var time = ""
         setContent {
             Column(
-
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             )
             {
-                Log.d("test", "message check")
-                time = NowButton("I just took my pill", "Time logged!", time)
-//                time = TimePickerButton("I already took my pill", "Time Logged!", time)
-                Text(text = "I took my first pill at: $time")
-//                SimpleOutlinedTextFieldSample()
-
+                TimerScreen()
             }
         }
     }
 }
 
+@Composable
+@Preview
+fun TimerScreen() {
+    var time by rememberSaveable { mutableStateOf("") }
+    Column{
+        TimePickerButton ("I already took my pill", "Time Logged!", time) { _, hour: Int, minute: Int ->
+            time = "$hour:$minute"
+        }
+        Text("I first took my pill at $time")
+    }
+
+}
+
 // from https://github.com/Kiran-Bahalaskar/Time-Picker-With-Jetpack-Compose/blob/master/app/src/main/java/com/kiranbahalaskar/timepicker/MainActivity.kt
 @Composable
-fun TimePickerButton(label: String, text: String, fixedTime: String): String {
+fun TimePickerButton(label: String, text: String, time: String, onValueChange: (TimePicker, Int, Int) -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
-    var time = fixedTime
     val timePickerDialog = TimePickerDialog(
         context,
-        { _, hour: Int, minute: Int ->
-            time = "$hour:$minute"
-        }, hour, minute, false
+        onValueChange, hour, minute, false
     )
         Button(onClick = {
             timePickerDialog.show()
@@ -72,7 +80,6 @@ fun TimePickerButton(label: String, text: String, fixedTime: String): String {
         }) {
             Text(text = label)
         }
-    return time
 }
 
 // from https://developer.android.com/jetpack/compose/text
@@ -88,25 +95,26 @@ fun SimpleOutlinedTextFieldSample() {
     Text(text = "more times today")
 }
 
-@Composable
-fun NowButton(label: String, text: String, fixedTime: String): String {
-    Log.d("test", "NowButton")
-    val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val hour = calendar[Calendar.HOUR_OF_DAY]
-    val minute = calendar[Calendar.MINUTE]
-    var time = fixedTime
-    Button(onClick = {
-        val duration = Toast.LENGTH_SHORT
-        val toast = Toast.makeText(context, text, duration)
-        toast.show()
-        time = "$hour:$minute"
-        Log.d("test", "$hour:$minute")
-        Log.d("test", "$time")
-    })
-    {
-    Text(label)
-    }
-    Log.d("test", "$time")
-    return time
-}
+//class StoreUserEmail(private val context: Context) {
+//
+//    // to make sure there's only one instance
+//    companion object {
+//        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userEmail")
+//        val USER_EMAIL_KEY = stringPreferencesKey("user_email")
+//    }
+//
+//    //get the saved email
+//    val getEmail: Flow<String?> = context.dataStoree.data
+//        .map { preferences ->
+//            preferences[USER_EMAIL_KEY] ?: "FirstLast@gmail.com"
+//        }
+//
+//    //save email into datastore
+//    suspend fun saveEmail(name: String) {
+//        context.dataStoree.edit { preferences ->
+//            preferences[USER_EMAIL_KEY] = name
+//        }
+//    }
+//
+//
+//}
