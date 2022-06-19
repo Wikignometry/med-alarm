@@ -1,20 +1,13 @@
 package com.medalarm.medalarm
 
 import android.app.TimePickerDialog
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.widget.TimePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -24,13 +17,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.datastore.core.DataStore
-import com.medalarm.medalarm.ui.theme.MedAlarmTheme
-import kotlinx.coroutines.flow.map
-import java.security.AccessController.getContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.util.*
-import java.util.concurrent.Flow
-import java.util.prefs.Preferences
 
 
 class MainActivity : ComponentActivity() {
@@ -52,7 +41,11 @@ class MainActivity : ComponentActivity() {
 @Preview
 fun TimerScreen() {
     var time by rememberSaveable { mutableStateOf("") }
-    Column{
+    var time2 by rememberSaveable { mutableStateOf("") }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(32.dp)
+    ){
         TimePickerButton ("I just took my pill", "Time Logged!", time) { _, hour: Int, minute: Int ->
             time = "$hour:$minute"
         }
@@ -63,6 +56,18 @@ fun TimerScreen() {
 //        ShowTimePicker("I already took my pill")
 //        Text("next one")
 //        ShowTimePicker("Last pill taken at")
+
+        Divider(modifier = Modifier.padding(16.dp))
+
+        Text("I will take my pill 3 more times today", fontSize = 24.sp)
+
+        Divider(modifier = Modifier.padding(16.dp))
+
+        Text("My last pill will be taken at ", fontSize = 24.sp)
+
+        Button({}) {
+            Text("1:30 PM")
+        }
     }
 }
 
