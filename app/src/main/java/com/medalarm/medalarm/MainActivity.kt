@@ -1,10 +1,8 @@
 package com.medalarm.medalarm
 
-import android.app.PendingIntent.getActivity
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.text.format.DateFormat
-import android.widget.TimePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -21,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.sql.Time
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -42,25 +42,30 @@ class MainActivity : ComponentActivity() {
 @Composable
 @Preview
 fun TimerScreen() {
-    var time by rememberSaveable { mutableStateOf("") }
-    var time2 by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
+    var sdf = SimpleDateFormat("h::mm aa")
+    if (DateFormat.is24HourFormat(context)) {
+        sdf = SimpleDateFormat("H::mm")
+    }
+    val currMs = System.currentTimeMillis()
+    var time: Time by rememberSaveable { mutableStateOf(Time(currMs)) }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(32.dp)
     ){
-        TimePickerButton ({ _, hour: Int, minute: Int ->
-            time = "$hour:$minute"
+        TimePickerButton ({ ms ->
+            time = Time(ms)
         }) {
             Text("I just took my pill")
         }
 
-        TimePickerButton ({ _, hour: Int, minute: Int ->
-            time = "$hour:$minute"
+        TimePickerButton ({ ms ->
+            time = Time(ms)
         }) {
             Text("My last pill will be taken at")
         }
 
-        Text("I first took my pill at $time")
+        Text("I first took my pill at ${sdf.format(time)}")
 //        ShowTimePicker("I already took my pill")
 //        Text("next one")
 //        ShowTimePicker("Last pill taken at")
@@ -82,7 +87,7 @@ fun TimerScreen() {
 
 // from https://github.com/Kiran-Bahalaskar/Time-Picker-With-Jetpack-Compose/blob/master/app/src/main/java/com/kiranbahalaskar/timepicker/MainActivity.kt
 @Composable
-fun TimePickerButton(onValueChange: (TimePicker, Int, Int) -> Unit,
+fun TimePickerButton(onValueChange: (Long) -> Unit,
                      content: @Composable() () -> Unit) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -90,7 +95,17 @@ fun TimePickerButton(onValueChange: (TimePicker, Int, Int) -> Unit,
     val minute = calendar[Calendar.MINUTE]
     val timePickerDialog = TimePickerDialog(
         context,
-        onValueChange, hour, minute, DateFormat.is24HourFormat(context)
+        {
+            _, hr, min ->
+            val convCal = Calendar.getInstance()
+            convCal.set(Calendar.HOUR_OF_DAY, hr)
+            convCal.set(Calendar.MINUTE, min)
+            convCal.set(Calendar.SECOND, 0)
+            convCal.set(Calendar.MILLISECOND, 0)
+
+            onValueChange(convCal.timeInMillis)
+        },
+        hour, minute, DateFormat.is24HourFormat(context)
     )
     Button(onClick = {
         timePickerDialog.show()
