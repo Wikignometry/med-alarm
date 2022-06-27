@@ -1,10 +1,18 @@
 package com.medalarm.medalarm
 
+import android.app.*
+import android.app.AlarmManager.RTC_WAKEUP
+import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
 import android.text.format.DateFormat
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,15 +22,12 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +35,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -40,8 +47,33 @@ import java.sql.Time
 import java.text.SimpleDateFormat
 import java.util.*
 
+class AlarmReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel("ALARM", "Alarm", NotificationManager.IMPORTANCE_HIGH)
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
+
+
+        Log.d("medalarm", "test!!!")
+        val notif = NotificationCompat.Builder(context, "ALARM")
+            .setSmallIcon(R.drawable.ic_alarm)
+            .setContentTitle("Pill Alarm!")
+            .setContentText("Placeholder Description")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        notificationManager.notify(1, notif)
+    }
+}
+
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
+
         super.onCreate(savedInstanceState)
         setContent {
             MedAlarmTheme {
@@ -77,7 +109,7 @@ fun TimerScreen() {
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = { setAlarms(context, time, endTime, count.value) },
                 icon = { Icon(Icons.Default.AddAlarm, "Add alarms") },
                 text = { Text(text = "Create Alarms") }, // TODO: make s conditional on alarm count
             )
@@ -156,6 +188,13 @@ fun TimerScreen() {
                     Text("Edit")
                 }
             }
+
+            item {
+                // For debugging :)
+                Button(onClick = { setAlarms(context, Time(System.currentTimeMillis()), Time(System.currentTimeMillis() + 1000), 1)}) {
+                    Text("Trigger alarm")
+                }
+            }
         }
     }
 }
@@ -217,39 +256,77 @@ fun showTimePicker(context: Context, onValueChange: (Long) -> Unit) {
     picker.show(activity.supportFragmentManager, tag)
 }
 
-// from https://developer.android.com/jetpack/compose/text
-@Composable
-fun SimpleOutlinedTextFieldSample() {
-    Text(text = "I will take my pill")
-    var text by remember { mutableStateOf("") }
-    OutlinedTextField(
-        value = text,
-        onValueChange = { text = it },
-        label = { Text("Label") }
-    )
-    Text(text = "more times today")
+private fun scheduleAlarms(context: Context, alarmManager: AlarmManager, start: Time, end: Time, amt: Int) {
+    val tag = "medalarm"
+
+    val activity = context.getActivity()
+    if (activity == null) {
+        Log.e(tag, "Activity was null!")
+        return
+    }
+
+    val convCal = Calendar.getInstance()
+
+    convCal.time = start
+    val startTime = convCal.timeInMillis
+
+    convCal.time = end
+    val endTime = convCal.timeInMillis
+
+    val delta = endTime - startTime
+    val gap = delta / amt
+
+    // end inclusive
+    for (i in 1..amt) {
+        val intent = Intent(context, AlarmReceiver::class.java)
+        intent.action = "PILL_ALARM_ACTION"
+
+        val pendingIntent = PendingIntent.getBroadcast(context, i, intent, FLAG_IMMUTABLE)
+
+        Log.d("medalarm", "setting an alarm")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                RTC_WAKEUP,
+                startTime + gap * i,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                RTC_WAKEUP,
+                startTime + gap * i,
+                pendingIntent
+            )
+        }
+    }
+    Toast.makeText(context, "Scheduled ${amt} alarms successfully.", Toast.LENGTH_LONG).show() // temporary?
 }
 
-//class StoreUserEmail(private val context: Context) {
-//
-//    // to make sure there's only one instance
-//    companion object {
-//        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userEmail")
-//        val USER_EMAIL_KEY = stringPreferencesKey("user_email")
-//    }
-//
-//    //get the saved email
-//    val getEmail: Flow<String?> = context.dataStoree.data
-//        .map { preferences ->
-//            preferences[USER_EMAIL_KEY] ?: "FirstLast@gmail.com"
-//        }
-//
-//    //save email into datastore
-//    suspend fun saveEmail(name: String) {
-//        context.dataStoree.edit { preferences ->
-//            preferences[USER_EMAIL_KEY] = name
-//        }
-//    }
-//
-//
-//}
+fun setAlarms(context: Context, start: Time, end: Time, amt: Int) {
+    val tag = "medalarm"
+
+    val activity = context.getActivity()
+    if (activity == null) {
+        Log.e(tag, "Activity was null!")
+        return
+    }
+
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        when {
+            alarmManager.canScheduleExactAlarms() -> {
+                scheduleAlarms(context, alarmManager, start, end, amt)
+            }
+            else -> {
+                // go to exact alarm settings
+                Intent().apply {
+                    action = ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                }.also {
+                    startActivity(context, it, null)
+                }
+            }
+        }
+    } else {
+        scheduleAlarms(context, alarmManager, start, end, amt)
+    }
+}
