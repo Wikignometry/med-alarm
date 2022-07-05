@@ -3,10 +3,12 @@ package com.medalarm.medalarm
 import android.app.*
 import android.app.AlarmManager.RTC_WAKEUP
 import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
@@ -21,13 +23,13 @@ import androidx.compose.material.icons.filled.AddAlarm
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -47,23 +49,38 @@ import java.sql.Time
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val CHANNEL_ID = "ALARM"
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val channel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel("ALARM", "Alarm", NotificationManager.IMPORTANCE_HIGH)
-        } else {
-            TODO("VERSION.SDK_INT < O")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val mChannel = NotificationChannel(CHANNEL_ID, "Alarm", importance)
+            mChannel.description = "placeholder"
+            mChannel.enableLights(true)
+            mChannel.lightColor = Color.RED
+            mChannel.enableVibration(true)
+            mChannel.vibrationPattern =
+                longArrayOf(50, 200, 400)
+            mChannel.setShowBadge(true)
+            notificationManager.createNotificationChannel(mChannel)
         }
 
+        val destIntent = Intent(context, AlarmActivity::class.java)
+        destIntent.action = "PILL_ALARM_ACTION"
+
+        val pendingIntent = PendingIntent.getActivity(context, 0, destIntent, FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT)
 
         Log.d("medalarm", "test!!!")
-        val notif = NotificationCompat.Builder(context, "ALARM")
+        val notif = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_alarm)
             .setContentTitle("Pill Alarm!")
             .setContentText("Placeholder Description")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setFullScreenIntent(pendingIntent, true)
             .build()
 
         notificationManager.notify(1, notif)
@@ -72,8 +89,6 @@ class AlarmReceiver : BroadcastReceiver() {
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-
-
         super.onCreate(savedInstanceState)
         setContent {
             MedAlarmTheme {
