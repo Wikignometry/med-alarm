@@ -80,7 +80,9 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentTitle("Pill Alarm!")
             .setContentText("Placeholder Description")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
             .setFullScreenIntent(pendingIntent, true)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .build()
 
         notificationManager.notify(1, notif)
