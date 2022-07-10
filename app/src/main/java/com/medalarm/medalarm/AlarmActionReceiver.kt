@@ -18,6 +18,6 @@ class AlarmActionReceiver : BroadcastReceiver() {
             notificationManager.cancel(notif_id)
         }
 
-        Log.d("medalarm", "cancelled notif")
+        Log.d("medalarm","cancelled notif")
     }
 }
