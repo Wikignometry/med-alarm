@@ -1,5 +1,6 @@
 package com.medalarm.medalarm.ui
 
+import android.content.Intent
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.medalarm.medalarm.AlarmActivity
 import com.medalarm.medalarm.setAlarms
 import java.sql.Time
 import java.text.SimpleDateFormat
@@ -126,8 +128,16 @@ fun TimerScreen() {
                 }
             }
 
+            // part 4
             item {
-                // For debugging :)
+                Divider(modifier = Modifier.padding(16.dp))
+            }
+            
+            item {
+                Text("Debugging stuff :)")
+            }
+
+            item {
                 Button(onClick = {
                     setAlarms(
                         context,
@@ -137,6 +147,14 @@ fun TimerScreen() {
                     )
                 }) {
                     Text("Trigger alarm")
+                }
+            }
+
+            item {
+                Button(onClick = {
+                    context.startActivity(Intent(context, AlarmActivity::class.java))
+                }) {
+                    Text("Show alarm activity")
                 }
             }
         }

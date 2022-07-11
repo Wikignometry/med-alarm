@@ -10,8 +10,12 @@ import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.fragment.app.FragmentActivity
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.medalarm.medalarm.ui.AlarmScreen
+import com.medalarm.medalarm.ui.theme.MedAlarmTheme
+import com.medalarm.medalarm.ui.theme.isLight
 
 class AlarmActivityReceiver(private val activity: AlarmActivity) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
@@ -42,7 +46,15 @@ class AlarmActivity : FragmentActivity() {
         registerReceiver(receiver, filter)
 
         setContent {
-            Text("Test")
+            MedAlarmTheme {
+                val systemUiController = rememberSystemUiController()
+                systemUiController.setSystemBarsColor(
+                    color = MaterialTheme.colorScheme.background,
+                    darkIcons = MaterialTheme.colorScheme.isLight()
+                )
+
+                AlarmScreen()
+            }
         }
     }
 

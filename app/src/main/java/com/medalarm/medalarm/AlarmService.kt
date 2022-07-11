@@ -15,6 +15,9 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import java.lang.Exception
 
+private const val NOTIF_ID = 1
+private const val CHANNEL_ID = "ALARM"
+
 class AlarmServiceReceiver(private val service: AlarmService) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
         service.stopCommand()
@@ -24,8 +27,6 @@ class AlarmServiceReceiver(private val service: AlarmService) : BroadcastReceive
 }
 
 class AlarmService : Service() {
-    private val NOTIF_ID = 1
-    private val CHANNEL_ID = "ALARM"
 
     private val player = MediaPlayer()
     private var notif = Notification()
@@ -61,7 +62,6 @@ class AlarmService : Service() {
 
     override fun onBind(p0: Intent?): IBinder? {
         TODO("Not yet implemented")
-        return null
     }
 
     fun stopCommand() {
@@ -95,10 +95,7 @@ class AlarmService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val alarmDismissIntent = Intent("com.medalarm.onalarmend")
-        alarmDismissIntent.putExtra("notif_id", NOTIF_ID)
-
-        val alarmDismissPendingIntent = PendingIntent.getBroadcast(this, -1, alarmDismissIntent, PendingIntent.FLAG_IMMUTABLE)
+        val alarmDismissPendingIntent = PendingIntent.getBroadcast(this, -1, getDismissIntent(), PendingIntent.FLAG_IMMUTABLE)
 
         notif = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_alarm)
@@ -146,4 +143,11 @@ class AlarmService : Service() {
 
         player.setDataSource(this, alarmSoundUri)
     }
+}
+
+fun getDismissIntent(): Intent {
+    val alarmDismissIntent = Intent("com.medalarm.onalarmend")
+    alarmDismissIntent.putExtra("notif_id", NOTIF_ID)
+
+    return alarmDismissIntent
 }
