@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="ThemeOverlay.App.TimePicker" parent="ThemeOverlay.MaterialComponents.TimePicker">
+        <item name="borderlessButtonStyle">@style/borderlessButtonStyle</item>
+    </style>
+
+    <style name="borderlessButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">?android:attr/colorPrimary</item>
+    </style>
+
     <style name="Theme.MedAlarm" parent="Theme.Material3.DynamicColors.DayNight">
+        <item name="materialTimePickerTheme">@style/ThemeOverlay.App.TimePicker</item>
     </style>
 </resources>

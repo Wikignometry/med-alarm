@@ -36,12 +36,14 @@ fun showTimePicker(context: Context, onValueChange: (Long) -> Unit) {
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
 
+
     val picker =
         MaterialTimePicker.Builder()
             .setTimeFormat(if (DateFormat.is24HourFormat(context)) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H)
             .setHour(hour)
             .setMinute(minute)
             .build()
+
 
     picker.addOnPositiveButtonClickListener { _ ->
         val hr = picker.hour
