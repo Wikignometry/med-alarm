@@ -9,21 +9,23 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.medalarm.medalarm.util.getActivity
+import java.sql.Time
 import java.util.*
 
 // from https://github.com/Kiran-Bahalaskar/Time-Picker-With-Jetpack-Compose/blob/master/app/src/main/java/com/kiranbahalaskar/timepicker/MainActivity.kt
 @Composable
 fun TimePickerButton(onValueChange: (Long) -> Unit,
+                     initialTime: Time,
                      content: @Composable() () -> Unit) {
     val context = LocalContext.current
     Button(onClick = {
-        showTimePicker(context, onValueChange)
+        showTimePicker(context, initialTime, onValueChange)
     }) {
         content()
     }
 }
 
-fun showTimePicker(context: Context, onValueChange: (Long) -> Unit) {
+fun showTimePicker(context: Context, initialTime: Time, onValueChange: (Long) -> Unit) {
     val tag = "medalarm"
 
     val activity = context.getActivity()
@@ -33,6 +35,7 @@ fun showTimePicker(context: Context, onValueChange: (Long) -> Unit) {
     }
 
     val calendar = Calendar.getInstance()
+    calendar.timeInMillis = initialTime.time
     val hour = calendar[Calendar.HOUR_OF_DAY]
     val minute = calendar[Calendar.MINUTE]
 

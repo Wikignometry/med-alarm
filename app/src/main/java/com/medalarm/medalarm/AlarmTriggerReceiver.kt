@@ -5,12 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import com.medalarm.medalarm.util.logDebug
 
 
 /* Receives signals when the alarm is reached and starts the TriggeredAlarmService */
 class AlarmTriggerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("medalarm", "alarm triggered")
+        logDebug("alarm triggered")
         launchService(context)
     }
 }

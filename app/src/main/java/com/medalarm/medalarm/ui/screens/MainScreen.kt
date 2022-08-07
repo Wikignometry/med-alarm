@@ -78,7 +78,7 @@ fun MainScreen(initialCount: Int, initialEndTime: Time) {
             item {
                 TimePickerButton({ ms ->
                     time = Time(ms)
-                }) {
+                }, time) {
                     Icon(Icons.Default.Edit, "Edit")
                     Text("Edit")
                 }
@@ -131,39 +131,43 @@ fun MainScreen(initialCount: Int, initialEndTime: Time) {
                 TimePickerButton({ ms ->
                     endTime = Time(ms)
                     composableScope.launch { saveEndTime(context, endTime) }
-                }) {
+                }, endTime) {
                     Icon(Icons.Default.Edit, "Edit")
                     Text("Edit")
                 }
             }
 
-            // part 4
-            item {
-                Divider(modifier = Modifier.padding(16.dp))
-            }
 
-            item {
-                Text("Debugging stuff :)")
-            }
 
-            item {
-                Button(onClick = {
-                    setAlarms(
-                        context,
-                        Time(System.currentTimeMillis()),
-                        Time(System.currentTimeMillis() + 1000),
-                        1
-                    )
-                }) {
-                    Text("Trigger alarm")
+            if (BuildConfig.DEBUG) {
+                // part 4
+                item {
+                    Divider(modifier = Modifier.padding(16.dp))
                 }
-            }
 
-            item {
-                Button(onClick = {
-                    context.startActivity(Intent(context, AlarmActivity::class.java))
-                }) {
-                    Text("Show alarm activity")
+                item {
+                    Text("Debugging stuff :)")
+                }
+
+                item {
+                    Button(onClick = {
+                        setAlarms(
+                            context,
+                            Time(System.currentTimeMillis()),
+                            Time(System.currentTimeMillis() + 1000),
+                            1
+                        )
+                    }) {
+                        Text("Trigger alarm")
+                    }
+                }
+
+                item {
+                    Button(onClick = {
+                        context.startActivity(Intent(context, AlarmActivity::class.java))
+                    }) {
+                        Text("Show alarm activity")
+                    }
                 }
             }
         }
@@ -180,7 +184,7 @@ fun MainScreen(initialCount: Int, initialEndTime: Time) {
                         NumberPicker(
                             dividersColor = MaterialTheme.colorScheme.primary,
                             value = pickerValue,
-                            range = 0..10,
+                            range = 1..10,
                             onValueChange = {
                                 pickerValue = it
                             },

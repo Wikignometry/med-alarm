@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +14,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.medalarm.medalarm.ui.screens.AlarmScreen
 import com.medalarm.medalarm.ui.theme.MedAlarmTheme
 import com.medalarm.medalarm.ui.theme.isLight
+import com.medalarm.medalarm.util.logDebug
 import java.util.*
 
 /*
@@ -24,7 +24,7 @@ import java.util.*
 class AlarmActivityReceiver(private val activity: AlarmActivity) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
         activity.finish()
-        Log.d("medalarm","ended activity")
+        logDebug("ended activity")
     }
 }
 

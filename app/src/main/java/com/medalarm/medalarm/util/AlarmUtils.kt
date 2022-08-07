@@ -37,6 +37,8 @@ fun scheduleAlarms(context: Context, alarmManager: AlarmManager, start: Time, en
     for (i in 1..count) {
         scheduleAlarm(context, alarmManager, startTime + gap * i, i)
     }
+
+    Toast.makeText(context, "Scheduled $count alarms.", Toast.LENGTH_LONG).show() // temporary?
 }
 
 fun scheduleAlarm(context: Context, alarmManager: AlarmManager, triggerAtMillis: Long, id: Int) {
@@ -61,8 +63,6 @@ fun scheduleAlarm(context: Context, alarmManager: AlarmManager, triggerAtMillis:
             pendingIntent
         )
     }
-
-    Toast.makeText(context, "Scheduled alarm ${id}.", Toast.LENGTH_LONG).show() // temporary?
 }
 
 fun setAlarms(context: Context, start: Time, end: Time, amt: Int) {

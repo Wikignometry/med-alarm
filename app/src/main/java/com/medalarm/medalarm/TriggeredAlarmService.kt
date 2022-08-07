@@ -11,8 +11,8 @@ import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.medalarm.medalarm.util.logDebug
 import com.medalarm.medalarm.util.scheduleAlarm
 import java.lang.Exception
 import java.util.*
@@ -30,7 +30,7 @@ class TriggeredAlarmServiceReceiver(private val service: TriggeredAlarmService) 
 
             val isSnooze = p1.getBooleanExtra("snooze", false)
             val notifId = p1.getIntExtra("notif_id", -10)
-            Log.d("medalarm", isSnooze.toString())
+            logDebug(isSnooze.toString())
 
             // If this is a snooze, set a new alarm in the future
             if (isSnooze) {
@@ -40,14 +40,14 @@ class TriggeredAlarmServiceReceiver(private val service: TriggeredAlarmService) 
                 val cal = Calendar.getInstance()
                 cal.add(Calendar.MINUTE, 5)
 
-                Log.d("medalarm", "scheduled snoozed alarm")
+                logDebug("scheduled snoozed alarm")
                 scheduleAlarm(p0, alarmManager, cal.timeInMillis, notifId)
             }
         }
 
         service.stopCommand()
 
-        Log.d("medalarm","cancelled notif")
+        logDebug("cancelled notif")
     }
 }
 
@@ -171,7 +171,7 @@ class TriggeredAlarmService : Service() {
 
         player.apply {
             setOnErrorListener { _, _, _ ->
-                Log.d("medalarm", "Error occurred while playing audio.")
+                logDebug("Error occurred while playing audio.")
                 true
             }
         }
