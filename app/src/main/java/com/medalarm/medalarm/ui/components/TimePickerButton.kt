@@ -1,4 +1,4 @@
-package com.medalarm.medalarm.ui
+package com.medalarm.medalarm.ui.components
 
 import android.content.Context
 import android.text.format.DateFormat
@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import com.medalarm.medalarm.getActivity
+import com.medalarm.medalarm.util.getActivity
 import java.util.*
 
 // from https://github.com/Kiran-Bahalaskar/Time-Picker-With-Jetpack-Compose/blob/master/app/src/main/java/com/kiranbahalaskar/timepicker/MainActivity.kt

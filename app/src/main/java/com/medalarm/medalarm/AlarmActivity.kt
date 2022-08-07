@@ -9,11 +9,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.setContent
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.fragment.app.FragmentActivity
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.medalarm.medalarm.ui.AlarmScreen
+import com.medalarm.medalarm.ui.screens.AlarmScreen
 import com.medalarm.medalarm.ui.theme.MedAlarmTheme
 import com.medalarm.medalarm.ui.theme.isLight
 import java.util.*
@@ -47,7 +46,7 @@ class AlarmActivity : FragmentActivity() {
         window.addFlags(    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
                     or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        val filter = IntentFilter("com.medalarm.onalarmend");
+        val filter = IntentFilter("com.medalarm.onalarmend")
         registerReceiver(receiver, filter)
 
         val startDate = Date(intent.getLongExtra("start_date", Date().time))

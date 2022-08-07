@@ -1,4 +1,4 @@
-package com.medalarm.medalarm.ui
+package com.medalarm.medalarm.ui.screens
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.*

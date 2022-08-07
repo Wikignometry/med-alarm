@@ -10,7 +10,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.medalarm.medalarm.AlarmTriggerReceiver
-import com.medalarm.medalarm.getActivity
 import java.sql.Time
 import java.util.*
 

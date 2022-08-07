@@ -1,4 +1,4 @@
-package com.medalarm.medalarm.ui
+package com.medalarm.medalarm.ui.screens
 
 import android.content.Intent
 import android.text.format.DateFormat
@@ -8,11 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAlarm
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,31 +18,35 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.medalarm.medalarm.AlarmActivity
 import java.sql.Time
 import java.text.SimpleDateFormat
 import com.chargemap.compose.numberpicker.*
-import com.medalarm.medalarm.util.setAlarms
+import com.medalarm.medalarm.ui.components.TimePickerButton
+import com.medalarm.medalarm.util.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun MainScreen() {
+fun MainScreen(initialCount: Int, initialEndTime: Time) {
     val context = LocalContext.current
+
+    val composableScope = rememberCoroutineScope()
+
     var sdf = SimpleDateFormat("h:mm aa")
     if (DateFormat.is24HourFormat(context)) {
         sdf = SimpleDateFormat("H:mm")
     }
+
     val currMs = System.currentTimeMillis()
     var time by rememberSaveable { mutableStateOf(Time(currMs)) }
-    var count = rememberSaveable { mutableStateOf(3) } // TODO: Make this save across app restarts
-    var endTime by rememberSaveable { mutableStateOf(Time(currMs)) } // TODO: Make this default to something reasonable and persist across app restarts
+    var count by rememberSaveable { mutableStateOf(initialCount) }
+    var endTime by rememberSaveable { mutableStateOf(initialEndTime) }
 
-    val openDialog = rememberSaveable { mutableStateOf(false)  }
-    var pickerValue by rememberSaveable { mutableStateOf(0) }
+    var openDialog by rememberSaveable { mutableStateOf(false)  }
+    var pickerValue by rememberSaveable { mutableStateOf(count)  }
 
     val textSize = 20.sp
 
@@ -53,9 +54,9 @@ fun MainScreen() {
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { setAlarms(context, time, endTime, count.value) },
+                onClick = { setAlarms(context, time, endTime, count) },
                 icon = { Icon(Icons.Default.AddAlarm, "Add alarms") },
-                text = { Text(text = if (count.value > 1) "Create Alarms" else "Create Alarm") },
+                text = { Text(text = if (count > 1) "Create Alarms" else "Create Alarm") },
             )
         },
     ) { paddingValues ->
@@ -94,7 +95,7 @@ fun MainScreen() {
                     append("I will take my pill ")
 
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("${count.value}")
+                        append("${count}")
                     }
 
                     append(" more times today")
@@ -103,7 +104,7 @@ fun MainScreen() {
 
             item {
                 Button(onClick = {
-                    openDialog.value = true
+                    openDialog = true
                 }) {
                     Icon(Icons.Default.Edit, "Edit")
                     Text("Edit")
@@ -129,6 +130,7 @@ fun MainScreen() {
             item {
                 TimePickerButton({ ms ->
                     endTime = Time(ms)
+                    composableScope.launch { saveEndTime(context, endTime) }
                 }) {
                     Icon(Icons.Default.Edit, "Edit")
                     Text("Edit")
@@ -166,10 +168,10 @@ fun MainScreen() {
             }
         }
 
-        if (openDialog.value) {
+        if (openDialog) {
             AlertDialog(
                 onDismissRequest = {
-                    openDialog.value = false
+                    openDialog = false
                 },
                 title = {
                     Text(text = "Select alarm count")
@@ -189,8 +191,9 @@ fun MainScreen() {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
-                            count.value = pickerValue
+                            openDialog = false
+                            count = pickerValue
+                            composableScope.launch { saveAlarmCount(context, count) }
                         }
                     ) {
                         Text("OK")
@@ -199,7 +202,7 @@ fun MainScreen() {
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
+                            openDialog = false
                         }
                     ) {
                         Text("CANCEL")
