@@ -13,20 +13,30 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.medalarm.medalarm.util.scheduleAlarm
 import java.lang.Exception
 import java.util.*
 
 private const val NOTIF_ID = 1
 private const val CHANNEL_ID = "ALARM"
 
-class AlarmServiceReceiver(private val service: AlarmService) : BroadcastReceiver() {
+/*
+ * Receiver owned by TriggeredAlarmService that handles the dismiss and snooze buttons
+ * Handles dismissing the alarm and snoozing (adding an additional alarm)
+ */
+class TriggeredAlarmServiceReceiver(private val service: TriggeredAlarmService) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
         if (p1 != null && p0 != null) {
+
             val isSnooze = p1.getBooleanExtra("snooze", false)
             val notifId = p1.getIntExtra("notif_id", -10)
             Log.d("medalarm", isSnooze.toString())
+
+            // If this is a snooze, set a new alarm in the future
             if (isSnooze) {
                 val alarmManager = p0.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+                // Snoozing is hard-coded 5 minutes currently
                 val cal = Calendar.getInstance()
                 cal.add(Calendar.MINUTE, 5)
 
@@ -41,12 +51,15 @@ class AlarmServiceReceiver(private val service: AlarmService) : BroadcastReceive
     }
 }
 
-class AlarmService : Service() {
+/*
+ * Service that handles the persistent notification and alarm sound playback while an alarm is currently triggered
+ */
+class TriggeredAlarmService : Service() {
 
     private val player = MediaPlayer()
     private var notif = Notification()
 
-    private val receiver = AlarmServiceReceiver(this)
+    private val receiver = TriggeredAlarmServiceReceiver(this)
 
     override fun onCreate() {
         super.onCreate()
@@ -85,7 +98,7 @@ class AlarmService : Service() {
         stopSelf()
     }
 
-    fun initNotification() {
+    private fun initNotification() {
         val notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -104,15 +117,21 @@ class AlarmService : Service() {
         alarmIntent.action = "PILL_ALARM_ACTION"
         alarmIntent.putExtra("start_date", Date().time)
 
+        val immutableFlag =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            PendingIntent.FLAG_IMMUTABLE
+        } else {
+            0
+        }
+
         val alarmPendingIntent = PendingIntent.getActivity(
             this,
             0,
             alarmIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            immutableFlag or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val alarmSnoozePendingIntent = PendingIntent.getBroadcast(this, -2, getSnoozeIntent(), PendingIntent.FLAG_IMMUTABLE)
-        val alarmDismissPendingIntent = PendingIntent.getBroadcast(this, -1, getDismissIntent(), PendingIntent.FLAG_IMMUTABLE)
+        val alarmSnoozePendingIntent = PendingIntent.getBroadcast(this, -2, getSnoozeIntent(), immutableFlag)
+        val alarmDismissPendingIntent = PendingIntent.getBroadcast(this, -1, getDismissIntent(), immutableFlag)
 
         notif = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_alarm)
@@ -130,7 +149,7 @@ class AlarmService : Service() {
 
     }
 
-    fun initMediaPlayer() {
+    private fun initMediaPlayer() {
         // temp
         var alarmSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 

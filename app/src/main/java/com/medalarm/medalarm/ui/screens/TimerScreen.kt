@@ -25,15 +25,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.medalarm.medalarm.AlarmActivity
-import com.medalarm.medalarm.setAlarms
 import java.sql.Time
 import java.text.SimpleDateFormat
 import com.chargemap.compose.numberpicker.*
+import com.medalarm.medalarm.util.setAlarms
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun TimerScreen() {
+fun MainScreen() {
     val context = LocalContext.current
     var sdf = SimpleDateFormat("h:mm aa")
     if (DateFormat.is24HourFormat(context)) {

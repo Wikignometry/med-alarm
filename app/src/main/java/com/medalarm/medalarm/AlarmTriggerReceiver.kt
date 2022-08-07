@@ -7,7 +7,8 @@ import android.os.Build
 import android.util.Log
 
 
-class AlarmReceiver : BroadcastReceiver() {
+/* Receives signals when the alarm is reached and starts the TriggeredAlarmService */
+class AlarmTriggerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("medalarm", "alarm triggered")
         launchService(context)
@@ -15,7 +16,7 @@ class AlarmReceiver : BroadcastReceiver() {
 }
 
 fun launchService(context: Context) {
-    val serviceIntent = Intent(context, AlarmService::class.java)
+    val serviceIntent = Intent(context, TriggeredAlarmService::class.java)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         context.startForegroundService(serviceIntent)

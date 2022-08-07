@@ -18,6 +18,10 @@ import com.medalarm.medalarm.ui.theme.MedAlarmTheme
 import com.medalarm.medalarm.ui.theme.isLight
 import java.util.*
 
+/*
+ * Receiver owned by AlarmActivity that handles the dismiss and snooze buttons
+ * Handles closing the activity
+ */
 class AlarmActivityReceiver(private val activity: AlarmActivity) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
         activity.finish()
@@ -25,7 +29,6 @@ class AlarmActivityReceiver(private val activity: AlarmActivity) : BroadcastRece
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 class AlarmActivity : FragmentActivity() {
 
     private val receiver = AlarmActivityReceiver(this)
@@ -41,7 +44,7 @@ class AlarmActivity : FragmentActivity() {
         }
 
         //set flags so activity is showed when phone is off (on lock screen)
-        window.addFlags(WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
+        window.addFlags(    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON
                     or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         val filter = IntentFilter("com.medalarm.onalarmend");
