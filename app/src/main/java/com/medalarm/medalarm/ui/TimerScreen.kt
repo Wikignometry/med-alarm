@@ -193,7 +193,7 @@ fun TimerScreen() {
                             count.value = pickerValue
                         }
                     ) {
-                        Text("Confirm")
+                        Text("OK")
                     }
                 },
                 dismissButton = {
@@ -202,7 +202,7 @@ fun TimerScreen() {
                             openDialog.value = false
                         }
                     ) {
-                        Text("Dismiss")
+                        Text("CANCEL")
                     }
                 },
             )

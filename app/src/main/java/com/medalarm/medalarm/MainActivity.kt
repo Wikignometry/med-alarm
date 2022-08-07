@@ -9,7 +9,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
-import android.text.format.DateFormat
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -17,8 +16,6 @@ import androidx.compose.material3.*
 import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
 import com.medalarm.medalarm.ui.TimerScreen
 import com.medalarm.medalarm.ui.theme.MedAlarmTheme
 import com.medalarm.medalarm.ui.theme.isLight
