@@ -16,6 +16,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.medalarm.medalarm.ui.AlarmScreen
 import com.medalarm.medalarm.ui.theme.MedAlarmTheme
 import com.medalarm.medalarm.ui.theme.isLight
+import java.util.*
 
 class AlarmActivityReceiver(private val activity: AlarmActivity) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
@@ -45,6 +46,8 @@ class AlarmActivity : FragmentActivity() {
         val filter = IntentFilter("com.medalarm.onalarmend");
         registerReceiver(receiver, filter)
 
+        val startDate = Date(intent.getLongExtra("start_date", Date().time))
+
         setContent {
             MedAlarmTheme {
                 val systemUiController = rememberSystemUiController()
@@ -53,7 +56,7 @@ class AlarmActivity : FragmentActivity() {
                     darkIcons = MaterialTheme.colorScheme.isLight()
                 )
 
-                AlarmScreen()
+                AlarmScreen(startDate)
             }
         }
     }

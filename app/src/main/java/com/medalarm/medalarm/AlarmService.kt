@@ -14,12 +14,27 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import java.lang.Exception
+import java.util.*
 
 private const val NOTIF_ID = 1
 private const val CHANNEL_ID = "ALARM"
 
 class AlarmServiceReceiver(private val service: AlarmService) : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
+        if (p1 != null && p0 != null) {
+            val isSnooze = p1.getBooleanExtra("snooze", false)
+            val notifId = p1.getIntExtra("notif_id", -10)
+            Log.d("medalarm", isSnooze.toString())
+            if (isSnooze) {
+                val alarmManager = p0.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val cal = Calendar.getInstance()
+                cal.add(Calendar.MINUTE, 5)
+
+                Log.d("medalarm", "scheduled snoozed alarm")
+                scheduleAlarm(p0, alarmManager, cal.timeInMillis, notifId)
+            }
+        }
+
         service.stopCommand()
 
         Log.d("medalarm","cancelled notif")
@@ -38,7 +53,7 @@ class AlarmService : Service() {
         initMediaPlayer()
         initNotification()
 
-        val filter = IntentFilter("com.medalarm.onalarmend");
+        val filter = IntentFilter("com.medalarm.onalarmend")
         registerReceiver(receiver, filter)
     }
 
@@ -87,6 +102,7 @@ class AlarmService : Service() {
 
         val alarmIntent = Intent(this, AlarmActivity::class.java)
         alarmIntent.action = "PILL_ALARM_ACTION"
+        alarmIntent.putExtra("start_date", Date().time)
 
         val alarmPendingIntent = PendingIntent.getActivity(
             this,
@@ -95,6 +111,7 @@ class AlarmService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
+        val alarmSnoozePendingIntent = PendingIntent.getBroadcast(this, -2, getSnoozeIntent(), PendingIntent.FLAG_IMMUTABLE)
         val alarmDismissPendingIntent = PendingIntent.getBroadcast(this, -1, getDismissIntent(), PendingIntent.FLAG_IMMUTABLE)
 
         notif = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -107,6 +124,7 @@ class AlarmService : Service() {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)
             .setSound(null)
+            .addAction(R.drawable.ic_snooze, "Snooze", alarmSnoozePendingIntent)
             .addAction(R.drawable.ic_alarm_off, "Dismiss", alarmDismissPendingIntent)
             .build()
 
@@ -150,4 +168,12 @@ fun getDismissIntent(): Intent {
     alarmDismissIntent.putExtra("notif_id", NOTIF_ID)
 
     return alarmDismissIntent
+}
+
+fun getSnoozeIntent(): Intent {
+    val alarmSnoozeIntent = Intent("com.medalarm.onalarmend")
+    alarmSnoozeIntent.putExtra("notif_id", NOTIF_ID)
+    alarmSnoozeIntent.putExtra("snooze", true)
+
+    return alarmSnoozeIntent
 }

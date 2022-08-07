@@ -2,7 +2,7 @@ package com.medalarm.medalarm.ui
 
 import android.content.Intent
 import android.text.format.DateFormat
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAlarm
@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -27,6 +28,7 @@ import com.medalarm.medalarm.AlarmActivity
 import com.medalarm.medalarm.setAlarms
 import java.sql.Time
 import java.text.SimpleDateFormat
+import com.chargemap.compose.numberpicker.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +44,9 @@ fun TimerScreen() {
     var count = rememberSaveable { mutableStateOf(3) } // TODO: Make this save across app restarts
     var endTime by rememberSaveable { mutableStateOf(Time(currMs)) } // TODO: Make this default to something reasonable and persist across app restarts
 
+    val openDialog = rememberSaveable { mutableStateOf(false)  }
+    var pickerValue by rememberSaveable { mutableStateOf(0) }
+
     val textSize = 20.sp
 
     Scaffold(
@@ -50,7 +55,7 @@ fun TimerScreen() {
             ExtendedFloatingActionButton(
                 onClick = { setAlarms(context, time, endTime, count.value) },
                 icon = { Icon(Icons.Default.AddAlarm, "Add alarms") },
-                text = { Text(text = "Create Alarms") }, // TODO: make s conditional on alarm count
+                text = { Text(text = if (count.value > 1) "Create Alarms" else "Create Alarm") },
             )
         },
     ) { paddingValues ->
@@ -97,7 +102,9 @@ fun TimerScreen() {
             }
 
             item {
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = {
+                    openDialog.value = true
+                }) {
                     Icon(Icons.Default.Edit, "Edit")
                     Text("Edit")
                 }
@@ -132,7 +139,7 @@ fun TimerScreen() {
             item {
                 Divider(modifier = Modifier.padding(16.dp))
             }
-            
+
             item {
                 Text("Debugging stuff :)")
             }
@@ -157,6 +164,48 @@ fun TimerScreen() {
                     Text("Show alarm activity")
                 }
             }
+        }
+
+        if (openDialog.value) {
+            AlertDialog(
+                onDismissRequest = {
+                    openDialog.value = false
+                },
+                title = {
+                    Text(text = "Select alarm count")
+                },
+                text = {
+                        NumberPicker(
+                            dividersColor = MaterialTheme.colorScheme.primary,
+                            value = pickerValue,
+                            range = 0..10,
+                            onValueChange = {
+                                pickerValue = it
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface)
+                        )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            openDialog.value = false
+                            count.value = pickerValue
+                        }
+                    ) {
+                        Text("Confirm")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            openDialog.value = false
+                        }
+                    ) {
+                        Text("Dismiss")
+                    }
+                },
+            )
         }
     }
 }

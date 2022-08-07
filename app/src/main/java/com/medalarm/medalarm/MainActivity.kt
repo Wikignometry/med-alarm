@@ -50,43 +50,6 @@ tailrec fun Context.getActivity(): FragmentActivity? = when (this) {
     else -> null
 }
 
-fun showTimePicker(context: Context, onValueChange: (Long) -> Unit) {
-    val tag = "medalarm"
-
-    val activity = context.getActivity()
-    if (activity == null) {
-        Log.e(tag, "Activity was null!")
-        return
-    }
-
-
-    val calendar = Calendar.getInstance()
-    val hour = calendar[Calendar.HOUR_OF_DAY]
-    val minute = calendar[Calendar.MINUTE]
-
-
-    val picker =
-        MaterialTimePicker.Builder()
-            .setTimeFormat(if (DateFormat.is24HourFormat(context)) TimeFormat.CLOCK_24H else TimeFormat.CLOCK_12H)
-            .setHour(hour)
-            .setMinute(minute)
-            .build()
-
-    picker.addOnPositiveButtonClickListener { _ ->
-        val hr = picker.hour
-        val min = picker.minute
-        val convCal = Calendar.getInstance()
-        convCal.set(Calendar.HOUR_OF_DAY, hr)
-        convCal.set(Calendar.MINUTE, min)
-        convCal.set(Calendar.SECOND, 0)
-        convCal.set(Calendar.MILLISECOND, 0)
-
-        onValueChange(convCal.timeInMillis)
-    }
-
-    picker.show(activity.supportFragmentManager, tag)
-}
-
 private fun scheduleAlarms(context: Context, alarmManager: AlarmManager, start: Time, end: Time, amt: Int) {
     val tag = "medalarm"
 
@@ -109,27 +72,32 @@ private fun scheduleAlarms(context: Context, alarmManager: AlarmManager, start: 
 
     // end inclusive
     for (i in 1..amt) {
-        val intent = Intent(context, AlarmReceiver::class.java)
-        intent.action = "PILL_ALARM_ACTION"
-
-        val pendingIntent = PendingIntent.getBroadcast(context, i, intent, FLAG_IMMUTABLE)
-
-        Log.d("medalarm", "setting an alarm")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                RTC_WAKEUP,
-                startTime + gap * i,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                RTC_WAKEUP,
-                startTime + gap * i,
-                pendingIntent
-            )
-        }
+        scheduleAlarm(context, alarmManager, startTime + gap * i, i)
     }
-    Toast.makeText(context, "Scheduled ${amt} alarms successfully.", Toast.LENGTH_LONG).show() // temporary?
+}
+
+fun scheduleAlarm(context: Context, alarmManager: AlarmManager, triggerAtMillis: Long, id: Int) {
+    val intent = Intent(context, AlarmReceiver::class.java)
+    intent.action = "PILL_ALARM_ACTION"
+
+    val pendingIntent = PendingIntent.getBroadcast(context, id, intent, FLAG_IMMUTABLE)
+
+    Log.d("medalarm", "setting an alarm")
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        alarmManager.setExactAndAllowWhileIdle(
+            RTC_WAKEUP,
+            triggerAtMillis,
+            pendingIntent
+        )
+    } else {
+        alarmManager.setExact(
+            RTC_WAKEUP,
+            triggerAtMillis,
+            pendingIntent
+        )
+    }
+
+    Toast.makeText(context, "Scheduled alarm ${id}.", Toast.LENGTH_LONG).show() // temporary?
 }
 
 fun setAlarms(context: Context, start: Time, end: Time, amt: Int) {
