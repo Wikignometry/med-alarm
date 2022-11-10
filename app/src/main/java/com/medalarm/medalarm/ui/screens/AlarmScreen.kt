@@ -51,8 +51,13 @@ fun AlarmScreen(receiverTime: Date) {
                 Text(text = "Snooze")
             }
 
+            Spacer(
+                Modifier.weight(0.02f)
+            )
+
             Button(
                 onClick = { context.sendBroadcast(getDismissIntent()) },
+                modifier = Modifier.size(width = 180.dp, height = 60.dp)
             ) {
                 Icon(Icons.Default.AlarmOff, "Alarm off")
                 Text(text = "Dismiss")

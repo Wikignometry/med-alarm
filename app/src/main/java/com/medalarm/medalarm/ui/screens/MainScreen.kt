@@ -139,7 +139,7 @@ fun MainScreen(initialCount: Int, initialEndTime: Time) {
 
 
 
-            if (BuildConfig.DEBUG) {
+            if (com.medalarm.medalarm.BuildConfig.BUILD_TYPE == "debug") {
                 // part 4
                 item {
                     Divider(modifier = Modifier.padding(16.dp))
